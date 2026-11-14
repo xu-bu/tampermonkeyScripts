@@ -131,13 +131,23 @@
   `;
   document.body.appendChild(sidebar);
 
+  function getQuestionElements() {
+    const els = document.querySelectorAll(
+      '[data-testid="user-message"] p.whitespace-pre-wrap.break-words, p.whitespace-pre-wrap.break-words',
+    );
+    return Array.from(els).filter((p) => {
+      const assistant = p.closest(
+        '[data-testid="assistant-message"], [data-testid*="assistant"], [aria-label*="assistant"], [class*="assistant"]',
+      );
+      return !assistant;
+    });
+  }
+
   function renderQuestions() {
     const list = document.getElementById("qs-list");
     if (!list) return;
 
-    const els = document.querySelectorAll(
-      '[data-testid="user-message"] p.whitespace-pre-wrap.break-words',
-    );
+    const els = getQuestionElements();
     list.innerHTML = "";
 
     els.forEach((p) => {
@@ -157,9 +167,7 @@
 
   // Poll until messages appear
   const t = setInterval(() => {
-    const els = document.querySelectorAll(
-      '[data-testid="user-message"] p.whitespace-pre-wrap.break-words',
-    );
+    const els = getQuestionElements();
     if (els.length) {
       clearInterval(t);
       renderQuestions();
@@ -171,5 +179,5 @@
   new MutationObserver(() => {
     clearTimeout(debounce);
     debounce = setTimeout(renderQuestions, 1500);
-  }).observe(document.body, { childList: true, subtree: false });
+  }).observe(document.body, { childList: true, subtree: true });
 })();
